@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirement Target Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a1a;
+        }
+        
+        /* Table distinct color replication */
+        .table-header-main {
+            background: linear-gradient(90deg, #6b1500 0%, #b03a00 50%, #2c0b00 100%);
+            color: #fdf5e6;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+        .table-header-sub {
+            background-color: #8c2614;
+            color: #ffffff;
+        }
+        .col-years {
+            background-color: #a33b20;
+            color: #fde8e3;
+            border-color: #732210;
+        }
+        .row-light {
+            background-color: #f9e5b5;
+            color: #4a3319;
+        }
+        .row-dark {
+            background-color: #e6b97f;
+            color: #4a3319;
+        }
+        
+        /* Thin grid lines to match image */
+        .table-borders th, .table-borders td {
+            border: 1px solid rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased p-4 md:p-8 flex justify-center min-h-screen">
+
+    <div class="w-full max-w-6xl flex flex-col gap-8">
+        
+        <!-- Controls Panel -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Calculation Assumptions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Monthly Spending -->
+                <div>
+                    <label for="monthlySpending" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Custom Monthly Spending
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-slate-500 font-medium">$</span>
+                        </div>
+                        <input type="number" id="monthlySpending" value="4347" step="1" 
+                            class="block w-full pl-8 pr-4 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 font-medium">
+                    </div>
+                </div>
+
+                <!-- Annual Inflation -->
+                <div>
+                    <label for="inflationRate" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Annual Inflation Rate
+                    </label>
+                    <div class="relative">
+                        <input type="number" id="inflationRate" value="3.49" step="0.01" 
+                            class="block w-full pl-4 pr-8 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 font-medium">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <span class="text-slate-500 font-medium">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Annual Interest -->
+                <div>
+                    <label for="interestRate" class="block text-sm font-semibold text-slate-700 mb-1">
+                        Annual Interest Rate
+                    </label>
+                    <div class="relative">
+                        <input type="number" id="interestRate" value="0.00" step="0.01" 
+                            class="block w-full pl-4 pr-8 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 font-medium">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <span class="text-slate-500 font-medium">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Table mirroring the original image structure -->
+        <div class="overflow-x-auto shadow-2xl rounded-lg">
+            <table class="w-full text-center border-collapse table-borders whitespace-nowrap">
+                <thead>
+                    <!-- Main Spanning Header -->
+                    <tr>
+                        <th colspan="9" class="table-header-main text-3xl md:text-4xl font-bold py-6 tracking-wide">
+                            Total Amount Needed for Retirement
+                        </th>
+                    </tr>
+                    <!-- Sub Headers -->
+                    <tr class="table-header-sub">
+                        <th rowspan="2" class="col-years text-sm md:text-base p-3 align-bottom w-32 tracking-wider">
+                            # Years in<br>Retirement
+                        </th>
+                        <th colspan="8" class="p-2 text-base md:text-lg font-medium border-b border-white/20">
+                            Amount Needed per Month
+                        </th>
+                    </tr>
+                    <tr class="table-header-sub text-sm" id="column-headers">
+                        <!-- Populated by JavaScript -->
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Core configuration
+        const columns = [3000, 5000, 7500, 10000, 12000, 15000, 20000];
+        const timeHorizons = [5, 10, 15, 20, 25, 30, 35, 40];
+
+        // Format numbers to US currency without decimals
+        const currencyFormatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+
+        function updateTable() {
+            // Retrieve values from inputs
+            const customAmount = parseFloat(document.getElementById('monthlySpending').value) || 0;
+            const inflation = parseFloat(document.getElementById('inflationRate').value) || 0;
+            const interest = parseFloat(document.getElementById('interestRate').value) || 0;
+            
+            // Build header columns dynamically
+            const headerRow = document.getElementById('column-headers');
+            let headerHTML = '';
+            columns.forEach(amt => {
+                headerHTML += `<th class="p-2 font-medium bg-red-900/40 border-l border-white/10">$${amt.toLocaleString()}/Mo</th>`;
+            });
+            // Append Custom column
+            headerHTML += `<th class="p-2 font-bold bg-yellow-600/50 border-l border-white/10 text-yellow-100">Custom ($${customAmount.toLocaleString()}/Mo)</th>`;
+            headerRow.innerHTML = headerHTML;
+            
+            // Calculate formula variables
+            const i_inf = inflation / 100 / 12;
+            const i_ret = interest / 100 / 12;
+            const R = (1 + i_inf) / (1 + i_ret);
+            
+            // Generate rows
+            const tbody = document.getElementById('table-body');
+            let bodyHTML = '';
+            
+            timeHorizons.forEach((years, index) => {
+                // Determine row color based on zero-indexed position
+                const isDark = index % 2 !== 0; 
+                const rowClass = isDark ? 'row-dark' : 'row-light';
+                const N = years * 12; // Total months
+                
+                let rowHTML = `<tr class="${rowClass}">`;
+                rowHTML += `<td class="p-3 text-left font-semibold col-years">${years} years</td>`;
+                
+                // Process all fixed columns + the dynamic custom column
+                const allAmounts = [...columns, customAmount];
+                
+                allAmounts.forEach((amount, colIndex) => {
+                    let presentValue = 0;
+                    
+                    // Calculation logic based on growth ratio (R)
+                    if (Math.abs(R - 1) < 1e-9) { 
+                        // If R is exactly 1 (e.g. inflation and interest are equal)
+                        presentValue = amount * N;
+                    } else {
+                        presentValue = amount * (1 - Math.pow(R, N)) / (1 - R);
+                    }
+                    
+                    // Highlight logic for the custom column specifically to stand out slightly
+                    const isCustomCol = colIndex === allAmounts.length - 1;
+                    const cellClass = isCustomCol ? "p-3 text-right tabular-nums font-semibold bg-white/20" : "p-3 text-right tabular-nums";
+                    
+                    rowHTML += `<td class="${cellClass}">${currencyFormatter.format(presentValue)}</td>`;
+                });
+                
+                rowHTML += `</tr>`;
+                bodyHTML += rowHTML;
+            });
+            
+            tbody.innerHTML = bodyHTML;
+        }
+
+        // Add event listeners for real-time interactivity
+        document.getElementById('monthlySpending').addEventListener('input', updateTable);
+        document.getElementById('inflationRate').addEventListener('input', updateTable);
+        document.getElementById('interestRate').addEventListener('input', updateTable);
+
+        // Initial render on page load
+        updateTable();
+    </script>
+</body>
+</html>
