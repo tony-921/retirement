@@ -46,6 +46,35 @@
 
     <div class="w-full max-w-6xl flex flex-col gap-8">
         
+        <!-- Results Table mirroring the original image structure -->
+        <div class="overflow-x-auto shadow-2xl rounded-lg">
+            <table class="w-full text-center border-collapse table-borders whitespace-nowrap">
+                <thead>
+                    <!-- Main Spanning Header -->
+                    <tr>
+                        <th colspan="9" class="table-header-main text-3xl md:text-4xl font-bold py-6 tracking-wide">
+                            Total Amount Needed for Retirement
+                        </th>
+                    </tr>
+                    <!-- Sub Headers -->
+                    <tr class="table-header-sub">
+                        <th rowspan="2" class="col-years text-sm md:text-base p-3 align-bottom w-32 tracking-wider">
+                            # Years in<br>Retirement
+                        </th>
+                        <th colspan="8" class="p-2 text-base md:text-lg font-medium border-b border-white/20">
+                            Amount Needed per Month
+                        </th>
+                    </tr>
+                    <tr class="table-header-sub text-sm" id="column-headers">
+                        <!-- Populated by JavaScript -->
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
         <!-- Controls Panel -->
         <div class="bg-white rounded-xl shadow-lg p-6 border border-slate-200">
             <h2 class="text-xl font-bold text-slate-800 mb-4">Calculation Assumptions</h2>
@@ -92,35 +121,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Results Table mirroring the original image structure -->
-        <div class="overflow-x-auto shadow-2xl rounded-lg">
-            <table class="w-full text-center border-collapse table-borders whitespace-nowrap">
-                <thead>
-                    <!-- Main Spanning Header -->
-                    <tr>
-                        <th colspan="9" class="table-header-main text-3xl md:text-4xl font-bold py-6 tracking-wide">
-                            Total Amount Needed for Retirement
-                        </th>
-                    </tr>
-                    <!-- Sub Headers -->
-                    <tr class="table-header-sub">
-                        <th rowspan="2" class="col-years text-sm md:text-base p-3 align-bottom w-32 tracking-wider">
-                            # Years in<br>Retirement
-                        </th>
-                        <th colspan="8" class="p-2 text-base md:text-lg font-medium border-b border-white/20">
-                            Amount Needed per Month
-                        </th>
-                    </tr>
-                    <tr class="table-header-sub text-sm" id="column-headers">
-                        <!-- Populated by JavaScript -->
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Populated by JavaScript -->
-                </tbody>
-            </table>
         </div>
     </div>
 
